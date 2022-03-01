@@ -1,0 +1,33 @@
+[
+    {
+        "key": "ApiToken",
+        "type": "input",
+        "defaultValue": "",
+        "templateOptions": {
+            "type": "password",
+            "label": "ApiToken",
+            "description": "The ApiToken to authenticate to the SpeakApp API",
+            "required": true
+        }
+    },
+    {
+        "key": "BaseUrl",
+        "type": "input",
+        "defaultValue": "",
+        "templateOptions": {
+            "label": "BaseUrl",
+            "description": "The URL to the SpeakApp API.",
+            "required": true
+        }
+    },
+    {
+        "key": "IsDebug",
+        "type": "checkbox",
+        "defaultValue": true,
+        "templateOptions": {
+          "label": "Toggle debug logging",
+          "description": "When toggled, debug logging will be displayed",
+          "required": false
+        }
+    }
+]
