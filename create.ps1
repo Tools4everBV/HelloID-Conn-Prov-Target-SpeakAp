@@ -12,6 +12,7 @@ $auditLogs = [System.Collections.Generic.List[PSCustomObject]]::new()
 $account = [ordered]@{
     schemas  = @("urn:ietf:params:scim:schemas:core:2.0:User")
     userName = $p.ExternalId
+    externalId = $p.externalId
     active   = $true
     name = @{
         givenName  = $p.Name.GivenName
@@ -148,8 +149,8 @@ try {
     }
 
     Write-Verbose "Verifying if account for '$($p.DisplayName)' must be created or correlated"
-    $lookup = $responseAllUsers.Resources | Group-Object -Property 'userName' -AsHashTable
-    $userObject = $lookup[$account.UserName]
+    $lookup = $responseAllUsers.Resources | Group-Object -Property 'externalId' -AsHashTable
+    $userObject = $lookup[$account.externalId]
     if ($userObject){
         Write-Verbose "Account for '$($p.DisplayName)' found with id '$($userObject.id)', switching to 'correlate'"
         $action = 'Correlate'
