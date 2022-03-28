@@ -2,7 +2,7 @@
 
 | :warning: Warning |
 |:---------------------------|
-| Note that this connector is **not ready** to use in your production environment.       |
+| Note that this HelloID connector has not been tested in a production environment! |
 
 | :information_source: Information |
 |:---------------------------|
