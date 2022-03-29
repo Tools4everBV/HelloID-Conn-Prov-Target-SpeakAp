@@ -1,5 +1,5 @@
 #####################################################
-# HelloID-Conn-Prov-Target-SpeakApp-Update
+# HelloID-Conn-Prov-Target-SpeakAp-Update
 #
 # Version: 1.0.0
 #####################################################
@@ -71,7 +71,7 @@ function Resolve-HTTPError {
 #endregion
 
 try {
-    Write-Verbose "Updating SpeakApp account for: '[$($p.DisplayName)]'"
+    Write-Verbose "Updating SpeakAp account for: '[$($p.DisplayName)]'"
     Write-Verbose 'Adding token to authorization headers'
     $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
     $headers.Add("Authorization", "Bearer $($config.ApiToken)")
@@ -79,12 +79,12 @@ try {
     # Add an auditMessage showing what will happen during enforcement
     if ($dryRun -eq $true){
         $auditLogs.Add([PSCustomObject]@{
-            Message = "Update SpeakApp account for: [$($p.DisplayName)], will be executed during enforcement"
+            Message = "Update SpeakAp account for: [$($p.DisplayName)], will be executed during enforcement"
         })
     }
 
     if (-not($dryRun -eq $true)) {
-        Write-Verbose "Updating SpeakApp account: [$aRef] for: [$($p.DisplayName)]"
+        Write-Verbose "Updating SpeakAp account: [$aRef] for: [$($p.DisplayName)]"
 
         $splatParams = @{
             Uri     = "$($config.BaseUrl)/Users/$aRef"
@@ -108,9 +108,9 @@ try {
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
         $errorObj = Resolve-HTTPError -ErrorObject $ex
-        $errorMessage = "Could not update SpeakApp account for: [$($p.DisplayName)]. Error: $($errorObj.ErrorMessage)"
+        $errorMessage = "Could not update SpeakAp account for: [$($p.DisplayName)]. Error: $($errorObj.ErrorMessage)"
     } else {
-        $errorMessage = "Could not update SpeakApp account for: [$($p.DisplayName)]. Error: $($ex.Exception.Message)"
+        $errorMessage = "Could not update SpeakAp account for: [$($p.DisplayName)]. Error: $($ex.Exception.Message)"
     }
     Write-Verbose $errorMessage
     $auditLogs.Add([PSCustomObject]@{
