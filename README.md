@@ -50,10 +50,6 @@ The following settings are required to connect to the API.
 
 ### Remarks
 
-#### Username
-
-Speakap doesn't seem to store the `employeeId` on the user object. Which makes it difficult to correlate a person. At this moment; the only way to correlate a HelloID person with a Speakap account is by using the `UserName` property.
-
 ## Setup the connector
 
 > _How to setup the connector in HelloID._ Are special settings required. Like the _primary manager_ settings for a source connector.
