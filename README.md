@@ -44,7 +44,7 @@ The following settings are required to connect to the API.
 | Setting      | Description                        | Mandatory   |
 | ------------ | -----------                        | ----------- |
 | ApiToken     | The ApiToken to connect to the Speakap SCIM API | Yes |
-| BaseUrl      | The URL to the Speakp API | Yes |
+| BaseUrl      | The URL to the Speakap API | Yes |
 
 ### Prerequisites
 
