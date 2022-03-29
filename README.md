@@ -1,4 +1,4 @@
-# HelloID-Conn-Prov-Target-SpeakApp
+# HelloID-Conn-Prov-Target-SpeakAp
 
 | :warning: Warning |
 |:---------------------------|
@@ -25,11 +25,11 @@
 
 ## Introduction
 
-_HelloID-Conn-Prov-Target-SpeakApp_ is a _target_ connector. SpeakApp provides a set of REST API's that allow you to programmatically interact with it's data. The HelloID connector uses the API endpoints listed in the table below.
+_HelloID-Conn-Prov-Target-SpeakAp_ is a _target_ connector. SpeakAp provides a set of REST API's that allow you to programmatically interact with it's data. The HelloID connector uses the API endpoints listed in the table below.
 
 ### SCIM API
 
-SpeakApp uses a SCIM based API for user provisioning. For more information on SCIM: www.simplecloud.info
+SpeakAp uses a SCIM based API for user provisioning. For more information on SCIM: www.simplecloud.info
 
 | Endpoint     | Description |
 | ------------ | ----------- |
@@ -43,8 +43,8 @@ The following settings are required to connect to the API.
 
 | Setting      | Description                        | Mandatory   |
 | ------------ | -----------                        | ----------- |
-| ApiToken     | The ApiToken to connect to the SpeakApp SCIM API | Yes |
-| BaseUrl      | The URL to the SpeakApp API | Yes |
+| ApiToken     | The ApiToken to connect to the SpeakAp SCIM API | Yes |
+| BaseUrl      | The URL to the Speakp API | Yes |
 
 ### Prerequisites
 
@@ -52,7 +52,7 @@ The following settings are required to connect to the API.
 
 #### Username
 
-SpeakApp doesn't seem to store the `employeeId` on the user object. Which makes it difficult to correlate a person. At this moment; the only way to correlate a HelloID person with a SpeakApp account is by using the `UserName` property.
+SpeakAp doesn't seem to store the `employeeId` on the user object. Which makes it difficult to correlate a person. At this moment; the only way to correlate a HelloID person with a SpeakAp account is by using the `UserName` property.
 
 ## Setup the connector
 
