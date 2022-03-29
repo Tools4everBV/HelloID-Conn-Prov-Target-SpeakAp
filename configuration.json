@@ -6,7 +6,7 @@
         "templateOptions": {
             "type": "password",
             "label": "ApiToken",
-            "description": "The ApiToken to authenticate to the SpeakApp API",
+            "description": "The ApiToken to authenticate to the SpeakAp API",
             "required": true
         }
     },
@@ -16,7 +16,7 @@
         "defaultValue": "",
         "templateOptions": {
             "label": "BaseUrl",
-            "description": "The URL to the SpeakApp API.",
+            "description": "The URL to the SpeakAp API.",
             "required": true
         }
     },
