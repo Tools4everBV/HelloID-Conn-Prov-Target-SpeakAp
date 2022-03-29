@@ -1,5 +1,5 @@
 #####################################################
-# HelloID-Conn-Prov-Target-SpeakAp-Create
+# HelloID-Conn-Prov-Target-Speakap-Create
 #
 # Version: 1.0.0
 #####################################################
@@ -121,7 +121,7 @@ function Resolve-HTTPError {
 
 # Begin
 try {
-    Write-Verbose "Creating SpeakAp account for: '[$($p.DisplayName)]'"
+    Write-Verbose "Creating Speakap account for: '[$($p.DisplayName)]'"
     Write-Verbose 'Adding token to authorization headers'
     $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
     $headers.Add("Authorization", "Bearer $($config.ApiToken)")
@@ -162,7 +162,7 @@ try {
     # Add an auditMessage showing what will happen during enforcement
     if ($dryRun -eq $true){
         $auditLogs.Add([PSCustomObject]@{
-            Message = "$action SpeakAp account for: [$($p.DisplayName)], will be executed during enforcement"
+            Message = "$action Speakap account for: [$($p.DisplayName)], will be executed during enforcement"
         })
     }
 
@@ -170,7 +170,7 @@ try {
     if (-not($dryRun -eq $true)){
         switch ($action) {
             'Create' {
-                Write-Verbose "Creating SpeakAp account for: [$($p.DisplayName)]"
+                Write-Verbose "Creating Speakap account for: [$($p.DisplayName)]"
                 $splatCreateUserParams = @{
                     Uri         = "$($config.BaseUrl)/Users"
                     Headers     = $headers
@@ -184,7 +184,7 @@ try {
             }
 
             'Correlate'{
-                Write-Verbose "Correlating SpeakAp account for: [$($p.DisplayName)]"
+                Write-Verbose "Correlating Speakap account for: [$($p.DisplayName)]"
                 $accountReference = $userObject.id
                 break
             }
@@ -202,9 +202,9 @@ try {
     if ($($ex.Exception.GetType().FullName -eq 'Microsoft.PowerShell.Commands.HttpResponseException') -or
         $($ex.Exception.GetType().FullName -eq 'System.Net.WebException')) {
         $errorObj = Resolve-HTTPError -ErrorObject $ex
-        $errorMessage = "Could not $action SpeakAp account for: [$($p.DisplayName)]. Error: $($errorObj.ErrorMessage)"
+        $errorMessage = "Could not $action Speakap account for: [$($p.DisplayName)]. Error: $($errorObj.ErrorMessage)"
     } else {
-        $errorMessage = "Could not $action SpeakAp account for: [$($p.DisplayName)]. Error: $($ex.Exception.Message)"
+        $errorMessage = "Could not $action Speakap account for: [$($p.DisplayName)]. Error: $($ex.Exception.Message)"
     }
     Write-Verbose $errorMessage
     $auditLogs.Add([PSCustomObject]@{
