@@ -77,6 +77,7 @@ try {
             ContentType = 'application/scim+json'
         }
         $results = Invoke-RestMethod @splatParams -Verbose:$false
+
         if ($results.id){
             $success = $true
             $auditLogs.Add([PSCustomObject]@{

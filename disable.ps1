@@ -6,7 +6,7 @@
 # Initialize default value's
 $config = $configuration | ConvertFrom-Json
 $p = $person | ConvertFrom-Json
-$aRef = $AccountReference | ConvertFrom-Json
+$aRef = $AccountReference | ConvertFrom-Json #"3LkWbQyK6vDXK10wPqe7"
 $success = $false
 $auditLogs = [System.Collections.Generic.List[PSCustomObject]]::new()
 
@@ -66,7 +66,7 @@ try {
         })
     }
 
-    if (-not($dryRun -eq $true)) {
+    if (-not($dryRun -eq $True)) {
         Write-Verbose "Disabling Speakap account: [$aRef] from: [$($p.DisplayName)]"
 
         $splatParams = @{

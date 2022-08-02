@@ -9,13 +9,15 @@ $p = $person | ConvertFrom-Json
 $success = $false
 $auditLogs = [System.Collections.Generic.List[PSCustomObject]]::new()
 
-$account = [ordered]@{
+$accountCreate = [ordered]@{
     schemas  = @("urn:ietf:params:scim:schemas:core:2.0:User")
     userName = $p.ExternalId
+    Sleutel = $p.ExternalId
+    upn = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName
     externalId = $p.externalId
     active   = $true
     name = @{
-        givenName  = $p.Name.GivenName
+        givenName  = $p.Name.NickName
         familyName = $p.Name.FamilyName
     }
     emails = @(@{
@@ -23,7 +25,7 @@ $account = [ordered]@{
         primary = $true
         type    = "Work"
     })
-    title = 'Developer Account'
+    title = $p.PrimaryContract.Title.Name
     "urn:speakap:params:scim:bag" = @{
         login = $p.externalId
     }
@@ -31,6 +33,12 @@ $account = [ordered]@{
         employeeNumber = $p.ExternalId
         department = $p.PrimaryContract.Department
     }
+}
+
+$accountCorrelate = [ordered]@{
+    schemas  = @("urn:ietf:params:scim:schemas:core:2.0:User")
+    userName = $p.ExternalId
+    active   = $true
 }
 
 # Enable TLS1.2
@@ -80,7 +88,7 @@ function Invoke-PagedRestMethod {
         $startIndex = 1
         [System.Collections.Generic.List[object]]$dataList = @()
         do {
-            $splatParams['Uri'] = "$Uri?startIndex=$startIndex&count=$count"
+            $splatParams['Uri'] = "$($Uri)?startIndex=$startIndex&count=$count"
             $result = Invoke-RestMethod @splatParams
             foreach ($resource in $result.Resources){
                 $dataList.Add($resource)
@@ -135,6 +143,9 @@ try {
     $responseTotal = Invoke-RestMethod @splatTotalUsersParams
     $totalResults = $responseTotal.totalResults
 
+    $action = "Create"
+
+    If( $totalResults -gt 0){
     Write-Verbose "Retrieving ['$totalResults'] users"
     $splatGetUserParams = @{
         Uri     = "$($config.BaseUrl)/Users"
@@ -142,15 +153,15 @@ try {
         Headers = $headers
     }
     if ($totalResults -gt 20){
-        $splatTotalUsersParams['TotalResults'] = $totalResults
+        $splatGetUserParams['TotalResults'] = $totalResults
         $responseAllUsers = Invoke-PagedRestMethod @splatGetUserParams -Verbose:$false
     } else {
         $responseAllUsers = Invoke-RestMethod @splatGetUserParams -Verbose:$false
     }
 
     Write-Verbose "Verifying if account for '$($p.DisplayName)' must be created or correlated"
-    $lookup = $responseAllUsers.Resources | Group-Object -Property 'externalId' -AsHashTable
-    $userObject = $lookup[$account.externalId]
+    $lookup = $responseAllUsers.Resources | Group-Object -Property 'userName' -AsHashTable
+    $userObject = $lookup[$accountCreate.externalId]
     if ($userObject){
         Write-Verbose "Account for '$($p.DisplayName)' found with id '$($userObject.id)', switching to 'correlate'"
         $action = 'Correlate'
@@ -158,16 +169,19 @@ try {
         Write-Verbose "No account for '$($p.DisplayName)' has been found, switching to 'create'"
         $action = 'Create'
     }
+    } Else {
+        $action = "Create"
+    }
 
     # Add an auditMessage showing what will happen during enforcement
-    if ($dryRun -eq $true){
+    if ($dryRun -eq $True){
         $auditLogs.Add([PSCustomObject]@{
             Message = "$action Speakap account for: [$($p.DisplayName)], will be executed during enforcement"
         })
     }
 
     # Process
-    if (-not($dryRun -eq $true)){
+    if (-not($dryRun -eq $True)){
         switch ($action) {
             'Create' {
                 Write-Verbose "Creating Speakap account for: [$($p.DisplayName)]"
@@ -175,7 +189,7 @@ try {
                     Uri         = "$($config.BaseUrl)/Users"
                     Headers     = $headers
                     Method      = 'POST'
-                    Body        = $account | ConvertTo-Json -Depth 20
+                    Body        = $accountCreate | ConvertTo-Json -Depth 20
                     ContentType = 'application/scim+json'
                 }
                 $response = Invoke-RestMethod @splatCreateUserParams -Verbose:$false
@@ -184,8 +198,24 @@ try {
             }
 
             'Correlate'{
+                $aRefCorr = $userObject.id
                 Write-Verbose "Correlating Speakap account for: [$($p.DisplayName)]"
-                $accountReference = $userObject.id
+                $splatParams = @{
+                    Uri         = "$($config.BaseUrl)/Users/$aRefCorr"
+                    Headers     = $headers
+                    Body        = $accountCorrelate | ConvertTo-Json -Depth 20
+                    Method      = 'PUT'
+                    ContentType = 'application/scim+json'
+                }
+                $results = Invoke-RestMethod @splatParams -Verbose:$false
+                if ($results.id){
+                    $success = $true
+                    $auditLogs.Add([PSCustomObject]@{
+                        Message = "Correlation for account: $($p.DisplayName) was successful."
+                        IsError = $False
+                    })
+                }
+                $accountReference = $results.id
                 break
             }
         }

@@ -66,7 +66,7 @@ try {
         })
     }
 
-    if (-not($dryRun -eq $true)) {
+    if (-not($dryRun -eq $True)) {
         Write-Verbose "Enabling Speakap account: [$aRef] from: [$($p.DisplayName)]"
 
         $splatParams = @{
