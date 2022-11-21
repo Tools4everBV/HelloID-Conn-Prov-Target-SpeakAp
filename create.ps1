@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Target-Speakap-Create
 #
-# Version: 1.0.0
+# Version: 1.0.1
 #####################################################
 # Initialize default value's
 $config = $configuration | ConvertFrom-Json
