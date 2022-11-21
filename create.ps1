@@ -86,7 +86,7 @@ try {
 
     Write-Verbose "Verifying if Speakap account for [$($p.DisplayName)] exists"
     $splatTotalUsersParams = @{
-        Uri     = "$($config.BaseUrl)/Users?filter=emails eq `"$($p.Contact.Business.Email)`""
+        Uri     = "$($config.BaseUrl)/Users?filter=userName eq `"$($p.ExternalId)`""
         Method  = 'GET'
         Headers = $headers
     }
