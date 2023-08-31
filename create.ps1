@@ -1,7 +1,7 @@
 #####################################################
 # HelloID-Conn-Prov-Target-Speakap-Create
 #
-# Version: 1.0.0
+# Version: 1.0.1
 #####################################################
 # Initialize default value's
 $config = $configuration | ConvertFrom-Json
@@ -10,12 +10,12 @@ $success = $false
 $auditLogs = [System.Collections.Generic.List[PSCustomObject]]::new()
 
 $accountCreate = [ordered]@{
-    schemas  = @("urn:ietf:params:scim:schemas:core:2.0:User")
-    userName = $p.ExternalId
-    Sleutel = $p.ExternalId
-    upn = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName
+    schemas    = @("urn:ietf:params:scim:schemas:core:2.0:User")
+    userName   = $p.ExternalId
+    Sleutel    = $p.ExternalId
+    upn        = $p.Accounts.MicrosoftActiveDirectory.userPrincipalName
     externalId = $p.externalId
-    active   = $true
+    active     = $true
     name = @{
         givenName  = $p.Name.NickName
         familyName = $p.Name.FamilyName
@@ -51,56 +51,6 @@ switch ($($config.IsDebug)) {
 }
 
 #region functions
-function Invoke-PagedRestMethod {
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Method,
-
-        [Parameter(Mandatory)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Uri,
-
-        [string]
-        $ContentType = 'application/json',
-
-        [Parameter(Mandatory)]
-        [System.Collections.IDictionary]
-        $Headers,
-
-        [string]
-        $TotalResults
-    )
-
-    try {
-        $splatParams = @{
-            Uri         = $Uri
-            Headers     = $Headers
-            Method      = $Method
-            ContentType = $ContentType
-        }
-
-        # Fixed value since each page contains 20 items max
-        $count = 20
-        $startIndex = 1
-        [System.Collections.Generic.List[object]]$dataList = @()
-        do {
-            $splatParams['Uri'] = "$($Uri)?startIndex=$startIndex&count=$count"
-            $result = Invoke-RestMethod @splatParams
-            foreach ($resource in $result.Resources){
-                $dataList.Add($resource)
-            }
-            $startIndex = $dataList.count
-        } until ($dataList.Count -eq $TotalResults)
-        Write-Output $dataList
-    } catch {
-        $PSCmdlet.ThrowTerminatingError($_)
-    }
-}
-
 function Resolve-HTTPError {
     [CmdletBinding()]
     param (
@@ -134,43 +84,20 @@ try {
     $headers = [System.Collections.Generic.Dictionary[string, string]]::new()
     $headers.Add("Authorization", "Bearer $($config.ApiToken)")
 
-    Write-Verbose 'Getting total number of users'
+    Write-Verbose "Verifying if Speakap account for [$($p.DisplayName)] exists"
     $splatTotalUsersParams = @{
-        Uri     = "$($config.BaseUrl)/Users"
+        Uri     = "$($config.BaseUrl)/Users?filter=userName eq `"$($p.ExternalId)`""
         Method  = 'GET'
         Headers = $headers
     }
-    $responseTotal = Invoke-RestMethod @splatTotalUsersParams
-    $totalResults = $responseTotal.totalResults
+    $responseUser = Invoke-RestMethod @splatTotalUsersParams
 
-    $action = "Create"
-
-    If( $totalResults -gt 0){
-    Write-Verbose "Retrieving ['$totalResults'] users"
-    $splatGetUserParams = @{
-        Uri     = "$($config.BaseUrl)/Users"
-        Method  = 'GET'
-        Headers = $headers
-    }
-    if ($totalResults -gt 20){
-        $splatGetUserParams['TotalResults'] = $totalResults
-        $responseAllUsers = Invoke-PagedRestMethod @splatGetUserParams -Verbose:$false
-    } else {
-        $responseAllUsers = Invoke-RestMethod @splatGetUserParams -Verbose:$false
-    }
-
-    Write-Verbose "Verifying if account for '$($p.DisplayName)' must be created or correlated"
-    $lookup = $responseAllUsers.Resources | Group-Object -Property 'userName' -AsHashTable
-    $userObject = $lookup[$accountCreate.externalId]
-    if ($userObject){
-        Write-Verbose "Account for '$($p.DisplayName)' found with id '$($userObject.id)', switching to 'correlate'"
+    if ($responseUser.Resources){
+        Write-Verbose "Account for '$($p.DisplayName)' found with id '$($responseUser.id)', switching to 'correlate'"
         $action = 'Correlate'
     } else {
         Write-Verbose "No account for '$($p.DisplayName)' has been found, switching to 'create'"
         $action = 'Create'
-    }
-    } Else {
-        $action = "Create"
     }
 
     # Add an auditMessage showing what will happen during enforcement
@@ -198,7 +125,7 @@ try {
             }
 
             'Correlate'{
-                $aRefCorr = $userObject.id
+                $aRefCorr = $responseUser.Resources[0].id
                 Write-Verbose "Correlating Speakap account for: [$($p.DisplayName)]"
                 $splatParams = @{
                     Uri         = "$($config.BaseUrl)/Users/$aRefCorr"
@@ -247,7 +174,7 @@ try {
         Success          = $success
         AccountReference = $accountReference
         Auditlogs        = $auditLogs
-        Account          = $account
+        Account          = $accountCreate
     }
     Write-Output $result | ConvertTo-Json -Depth 10
 }
